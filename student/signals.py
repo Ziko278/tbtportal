@@ -24,7 +24,7 @@ def create_parent_account(sender, instance, created, **kwargs):
     if created:
         parent = instance
         username = parent.parent_id
-        password = User.objects.make_random_password(length=8)
+        password = get_random_string(8)
         email = parent.email
 
         user = User.objects.create_user(username=username, email=email, password=password)
