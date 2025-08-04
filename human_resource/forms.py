@@ -1,7 +1,6 @@
 from django.forms import ModelForm, Select, TextInput, DateInput, CheckboxInput
 from human_resource.models import *
 
-
 class DepartmentForm(ModelForm):
     """  """
     def __init__(self, *args, **kwargs):

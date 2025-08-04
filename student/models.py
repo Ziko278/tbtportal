@@ -142,7 +142,8 @@ class StudentsModel(models.Model):
     religion = models.CharField(max_length=30, choices=RELIGION, null=True, blank=True)
     image = models.FileField(blank=True, null=True, upload_to='images/student_images')
     mobile = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=100, null=True, blank=True)
+    email = models.EmailField(max_length=100, null=True, blank=True, unique=True)
+    password = models.CharField(max_length=100, null=True, blank=True)
     BG = (
         ('a+', 'A+'), ('a-', 'A-'), ('b+', 'B+'), ('b-', 'B-'), ('ab+', 'AB+'), ('ab-', 'AB-'), ('o+', 'O+'),
         ('o-', 'O-'),

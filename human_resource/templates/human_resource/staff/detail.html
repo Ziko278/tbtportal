@@ -84,7 +84,7 @@
                                                                         <p>Employment Date : <i><b>{% if staff.employment_date %} {{staff.employment_date|date }} {% else %} Not Provided {% endif %}</b></i></p>
                                                                         <p>Teacher : <i><b> {% if staff.can_teach %} Yes {% else %} No {% endif %} </b></i></p>
                                                                         <p>CV : <i><b>{% if staff.cv %} <a target="_blank" href="{{staff.cv.url}}">Download</a> {% endif %}</b></i></p>
-                                                                         <p>Username : <i><b  id="username">{{ staff.staff_id }}</b></i>
+                                                                         <p>Username : <i><b  id="username">{{ staff.account.user }}</b></i>
                                                                             <span class="copy" id="copy_username_alert" style="float:right;position:relative;top:-20px;color:green;font-family:cursive"></span>
                                                                             <button class="btn btn-secondary copy_button" style="float:right" id="copy_username"><i class="bx bxs-copy" style="height:100%"></i></button>
                                                                         </p>

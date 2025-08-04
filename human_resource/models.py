@@ -78,6 +78,7 @@ class StaffModel(models.Model):
     residential_address = models.CharField(max_length=200, blank=True, null=True)
     mobile = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
+    password = models.CharField(max_length=100, null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
     lga = models.CharField(max_length=100, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -156,10 +157,11 @@ class StaffModel(models.Model):
                 staff_id = str(1)
             while True:
                 gen_id = staff_id
+                prefix = staff_setting.staff_id_prefix if staff_setting.staff_id_prefix else ''
                 if setting.school_type == 'mix':
-                    staff_id = f"{staff_setting.staff_id_prefix}{self.type[0]}s-{staff_id.rjust(7, '0')}"
+                    staff_id = f"{prefix}{self.type[0]}s-{staff_id.rjust(7, '0')}"
                 else:
-                    staff_id = f"{staff_setting.staff_id_prefix}s-{staff_id.rjust(7, '0')}"
+                    staff_id = f"{prefix}s-{staff_id.rjust(7, '0')}"
 
                 staff_exist = StaffModel.objects.filter(staff_id=staff_id).first()
                 if not staff_exist:

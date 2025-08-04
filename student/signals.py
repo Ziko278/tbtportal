@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from user_management.models import UserProfileModel
 from communication.models import RecentActivityModel
 from school_setting.models import SchoolAcademicInfoModel
+from django.utils.crypto import get_random_string
 
 
 def assign_class_number(student_class, class_section):
@@ -37,11 +38,9 @@ def create_parent_account(sender, instance, created, **kwargs):
 def create_student_account(sender, instance, created, **kwargs):
     if created:
         student = instance
-
-        username = student.registration_number
-        password = User.objects.make_random_password(length=8)
         email = student.email
-
+        username = email if email else student.staff_id
+        password = student.password if student.password else get_random_string(8)
         user = User.objects.create_user(username=username, email=email, password=password)
         user_profile = UserProfileModel.objects.create(user=user, reference_id=student.id, student=student,
                                                        reference='student',

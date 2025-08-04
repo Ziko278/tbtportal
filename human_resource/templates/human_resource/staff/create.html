@@ -37,9 +37,7 @@
                 <label for="floatingPassword">Last Name <span style="color:red">*</span></label>
                 <div class="invalid-tooltip">last name is required!</div>
               </div>
-            </div>
 
-            <div class="row mb-3">
               <div class="form-floating mb-3 col-md-4">
                 {{form.mobile}}
                 <label for="floatingInput"> Phone No</label>
@@ -49,12 +47,14 @@
                 <label for="floatingInput">Email</label>
               </div>
               <div class="form-floating mb-3 col-md-4">
+                {{form.password}}
+                <label for="floatingInput">Password</label>
+              </div>
+              <div class="form-floating mb-3 col-md-4">
                 {{form.residential_address}}
                 <label for="floatingPassword">Address</label>
               </div>
-            </div>
 
-            <div class="row mb-3">
               <div class="form-floating mb-3 col-md-4">
                 {{form.gender}}
                 <label for="floatingInput">Gender <span style="color:red">*</span></label>
