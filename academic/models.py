@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from human_resource.models import StaffModel
 from school_setting.models import SchoolSettingModel
 from django.apps import apps
+from admin_dashboard.storage_backends import MediaStorage
 
 
 class SubjectsModel(models.Model):
@@ -279,7 +280,7 @@ class LessonNoteModel(models.Model):
     scheduled_date = models.DateField(blank=True, null=True)
     scheduled_time = models.TimeField(blank=True, null=True)
     content = models.TextField()
-    attachment = models.FileField(blank=True, null=True, upload_to='lesson_note')
+    attachment = models.FileField(blank=True, storage=MediaStorage(), null=True, upload_to='lesson_note')
     STATUS = (('pending', 'PENDING'), ('approved', 'APPROVED'), ('declined', 'DECLINED'))
     status = models.CharField(max_length=20, blank=True, default='pending')
     decline_reason = models.TextField(null=True, blank=True)
@@ -300,7 +301,7 @@ class LessonDocumentModel(models.Model):
     subject = models.ForeignKey(SubjectsModel, blank=True, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     grant_access = models.BooleanField(default=False)
-    document = models.FileField(upload_to='lesson_document')
+    document = models.FileField(upload_to='lesson_document', storage=MediaStorage())
     TYPE = (
         ('pri', 'PRIMARY'), ('sec', 'SECONDARY')
     )

@@ -4,6 +4,7 @@ from school_setting.models import SchoolSettingModel, SchoolGeneralInfoModel
 from user_management.models import UserProfileModel
 from io import BytesIO
 from django.apps import apps
+from admin_dashboard.storage_backends import MediaStorage
 
 
 class DepartmentModel(models.Model):
@@ -74,7 +75,7 @@ class StaffModel(models.Model):
     middle_name = models.CharField(max_length=50, null=True, blank=True, default='')
     last_name = models.CharField(max_length=50)
 
-    image = models.FileField(upload_to='images/staff_images', blank=True, null=True)
+    image = models.FileField(upload_to='images/staff_images', storage=MediaStorage(), blank=True, null=True)
     residential_address = models.CharField(max_length=200, blank=True, null=True)
     mobile = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
@@ -101,7 +102,7 @@ class StaffModel(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     staff_id = models.CharField(max_length=100, blank=True, null=True)
     employment_date = models.DateField(blank=True, null=True)
-    cv = models.FileField(upload_to='staff/cv', null=True, blank=True)
+    cv = models.FileField(upload_to='staff/cv', storage=MediaStorage(), null=True, blank=True)
 
     salary = models.BigIntegerField(blank=True, null=True, default=0)
     bank_name = models.CharField(max_length=100, null=True, blank=True)

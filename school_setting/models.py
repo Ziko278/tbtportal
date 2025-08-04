@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from admin_dashboard.storage_backends import MediaStorage
 
 
 class SessionModel(models.Model):
@@ -47,7 +48,7 @@ class SchoolGeneralInfoModel(models.Model):
         ('pri', 'PRIMARY'), ('sec', 'SECONDARY'), ('mix', 'MIXED')
     )
     school_type = models.CharField(max_length=200, choices=SCHOOL_TYPE)
-    logo = models.FileField(upload_to='images/logo', blank=True)
+    logo = models.FileField(upload_to='images/logo', storage=MediaStorage(), blank=True)
     mobile_1 = models.CharField(max_length=20)
     mobile_2 = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField()

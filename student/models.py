@@ -7,6 +7,7 @@ import random
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.apps import apps
+from admin_dashboard.storage_backends import MediaStorage
 
 
 class ParentsModel(models.Model):
@@ -20,7 +21,7 @@ class ParentsModel(models.Model):
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50)
 
-    image = models.FileField(blank=True, null=True, upload_to='images/parent_images')
+    image = models.FileField(blank=True, null=True, storage=MediaStorage(), upload_to='images/parent_images')
     residential_address = models.CharField(max_length=200, null=True, blank=True)
     mobile = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
@@ -140,7 +141,7 @@ class StudentsModel(models.Model):
         ('christianity', 'CHRISTIANITY'), ('islam', 'ISLAM'), ('others', 'OTHERS')
     )
     religion = models.CharField(max_length=30, choices=RELIGION, null=True, blank=True)
-    image = models.FileField(blank=True, null=True, upload_to='images/student_images')
+    image = models.FileField(blank=True, null=True, storage=MediaStorage(), upload_to='images/student_images')
     mobile = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True, unique=True)
     password = models.CharField(max_length=100, null=True, blank=True)

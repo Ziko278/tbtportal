@@ -10,6 +10,7 @@ from school_setting.models import SchoolSettingModel, SessionModel
 from student.models import StudentsModel
 from academic.models import *
 from school_setting.models import SchoolAcademicInfoModel, SchoolGeneralInfoModel
+from admin_dashboard.storage_backends import MediaStorage
 
 
 def generate_payment_id(type):
@@ -305,7 +306,7 @@ class FeePaymentModel(models.Model):
     online_payment_method = models.CharField(max_length=100, choices=METHOD, null=True, blank=True)
     vat = models.FloatField(default=0, blank=True, null=True)
     date = models.DateField(default=date.today(), blank=True)
-    payment_proof = models.FileField(blank=True, null=True, upload_to='finance/fee_payment')
+    payment_proof = models.FileField(blank=True, null=True, storage=MediaStorage(), upload_to='finance/fee_payment')
     amount = models.FloatField()
     reference = models.CharField(max_length=100, blank=True, null=True)
     STATUS = (
@@ -342,7 +343,7 @@ class FeePaymentSummaryModel(models.Model):
     online_payment_method = models.CharField(max_length=100, choices=METHOD, null=True, blank=True)
     vat = models.FloatField(default=0)
     date = models.DateField(default=date.today(), blank=True)
-    payment_proof = models.FileField(blank=True, null=True, upload_to='finance/fee_payment')
+    payment_proof = models.FileField(blank=True, null=True, storage=MediaStorage(), upload_to='finance/fee_payment')
     amount = models.FloatField()
     reference = models.CharField(max_length=100, blank=True, null=True)
     STATUS = (
@@ -503,7 +504,7 @@ class ExpenseModel(models.Model):
     description = models.TextField(null=True, blank=True)
     amount = models.FloatField()
     date = models.DateTimeField(blank=True, default=date.today())
-    expense_proof = models.FileField(upload_to='finance/expense', blank=True, null=True)
+    expense_proof = models.FileField(upload_to='finance/expense', storage=MediaStorage(), blank=True, null=True)
     session = models.ForeignKey(SessionModel, on_delete=models.CASCADE, blank=True)
     TERM = (
         ('1st term', '1st Term'), ('2nd term', '2nd Term'), ('3rd term', '3rd Term')
@@ -597,7 +598,7 @@ class IncomeModel(models.Model):
     description = models.TextField(null=True, blank=True)
     amount = models.FloatField()
     date = models.DateTimeField(blank=True, default=date.today())
-    income_proof = models.FileField(upload_to='finance/income', blank=True, null=True)
+    income_proof = models.FileField(upload_to='finance/income', storage=MediaStorage(), blank=True, null=True)
     session = models.ForeignKey(SessionModel, on_delete=models.CASCADE, blank=True)
     TERM = (
         ('1st term', '1st Term'), ('2nd term', '2ndTerm'), ('3rd term', '3rd Term')
