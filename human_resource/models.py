@@ -77,7 +77,7 @@ class StaffModel(models.Model):
 
     image = models.FileField(upload_to='images/staff_images', storage=MediaStorage(), blank=True, null=True)
     residential_address = models.CharField(max_length=200, blank=True, null=True)
-    mobile = models.CharField(max_length=20, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True, unique=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
