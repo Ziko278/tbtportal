@@ -39,7 +39,7 @@ def create_student_account(sender, instance, created, **kwargs):
     if created:
         student = instance
         email = student.email
-        username = email if email else student.staff_id
+        username = email if email else student.registration_number
         password = student.password if student.password else get_random_string(8)
         user = User.objects.create_user(username=username, email=email, password=password)
         user_profile = UserProfileModel.objects.create(user=user, reference_id=student.id, student=student,
@@ -49,12 +49,6 @@ def create_student_account(sender, instance, created, **kwargs):
 
         student.class_number = assign_class_number(student.student_class, student.class_section)
         student.save()
-
-        setting = SchoolGeneralInfoModel.objects.first()
-        if setting.school_type == 'mix' and setting.separate_school_section:
-            student_setting = StudentSettingModel.objects.filter(type=student.type).first()
-        else:
-            student_setting = StudentSettingModel.objects.first()
 
 
 @receiver(post_save, sender=StudentsModel)

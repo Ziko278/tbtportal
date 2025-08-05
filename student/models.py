@@ -236,26 +236,7 @@ class StudentsModel(models.Model):
                         user.email = self.email  # Update email if provided
                     user.save()  # Save updated user details
                 except UserProfileModel.DoesNotExist:
-                    # Create a new user account if no profile exists
-                    username = self.registration_number
-                    email = self.email
-                    password = User.objects.make_random_password(length=8)  # Generate random password
-                    user, created = User.objects.get_or_create(
-                        username=username,
-                        defaults={'email': email, 'password': password}
-                    )
-                    if created:
-                        user.set_password(password)  # Set the generated password
-                        user.save()
-                        # Create a new user profile
-                        UserProfileModel.objects.create(
-                            user=user,
-                            student=self,
-                            type=self.type,
-                            default_password=password,
-                            reference='student',
-                            reference_id=self.id
-                        )
+                    pass
 
             # Save the student instance
         super().save(*args, **kwargs)
