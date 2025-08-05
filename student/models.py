@@ -231,7 +231,6 @@ class StudentsModel(models.Model):
                     # Check if a user profile exists for the student
                     user_profile = UserProfileModel.objects.get(student_id=self.id)
                     user = user_profile.user
-                    user.username = self.registration_number  # Update username to match registration number
                     if self.email:
                         user.email = self.email  # Update email if provided
                     user.save()  # Save updated user details
