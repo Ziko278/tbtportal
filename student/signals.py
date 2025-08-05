@@ -39,7 +39,7 @@ def create_student_account(sender, instance, created, **kwargs):
     if created:
         student = instance
         email = student.email
-        username = email if email else student.registration_number
+        username = student.email if student.email else student.registration_number
         password = student.password if student.password else get_random_string(8)
         user = User.objects.create_user(username=username, email=email, password=password)
         user_profile = UserProfileModel.objects.create(user=user, reference_id=student.id, student=student,
