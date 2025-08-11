@@ -8,17 +8,7 @@
            {% if is_class %}
               <h4 class="card-title text-center">List of Student in {{ student_class|title}} {{class_section|title}}</h4>
           {% else %}
-              <h4 class="card-title text-center">List of Student
-              {% if school_info.separate_school_section and school_info.school_type == 'mix' %}
-                      {% if user.profile.type == 'pri' %}
-                          in Primary Division of the School
-                      {% elif user.profile.type == 'sec' %}
-                          in Secondary Division of the School
-                      {% elif user.profile.type == 'mix' %}
-                          in the School
-                      {% endif %}
-                  {% endif %}
-              </h4>
+              <h4 class="card-title text-center">List of Student in the School</h4>
           {% endif %}
           <form action="" method="post">
               {% csrf_token %}

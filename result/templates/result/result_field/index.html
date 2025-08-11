@@ -18,16 +18,7 @@
         </div>
 
         <div class="card-body">
-            <h5 class="card-title">Result Field List
-            {% if school_info.separate_school_section and school_info.school_type == 'mix' %}
-                    {% if user.profile.type == 'pri' %}
-                        in Primary Division of the School
-                    {% elif user.profile.type == 'sec' %}
-                        in Secondary Division of the School
-                    {% elif user.profile.type == 'mix' %}
-                        in the School
-                    {% endif %}
-                {% endif %}</h5>
+            <h5 class="card-title">Result Field List in the School</h5>
             {% if form.errors %}
                 <h5 class="text-danger">{{form.errors}}</h5>
             {% endif %}
