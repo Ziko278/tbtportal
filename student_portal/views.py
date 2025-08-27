@@ -481,6 +481,13 @@ def student_bulk_payment_create_view(request):
     return redirect(reverse('fee_select_student'))
 
 
+class StudentFeeDetailView(LoginRequiredMixin, DetailView):
+    model = FeePaymentSummaryModel
+    fields = '__all__'
+    template_name = 'student_portal/fee/detail.html'
+    context_object_name = "fee_payment"
+
+
 class StudentLessonNoteListView(LoginRequiredMixin, ListView):
     model = LessonNoteModel
     fields = '__all__'

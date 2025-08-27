@@ -9,6 +9,7 @@ urlpatterns = [
     path('fee/index', StudentFeeView.as_view(), name='student_fee'),
     path('fee/upload', StudentFeePaymentCreateView.as_view(), name='student_fee_create'),
     path('fee/payments', student_fee_payment_list_view, name='student_fee_payments'),
+    path('fee/payments/<int:pk>/detail', StudentFeeDetailView.as_view(), name='student_fee_detail'),
     path('fee/select-method', select_fee_method, name='select_fee_method'),
     path('fee/pay-multiple-fee', student_bulk_payment_create_view, name='student_bulk_payment'),
     path('fee/payment/<int:payment_pk>/<int:student_pk>/create', student_create_fee__payment_summary,

@@ -52,6 +52,7 @@
                             <th scope="col">Amount Paid</th>
                             <th scope="col" style="min-width:130px">Date</th>
                             <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,6 +62,9 @@
                                 <td scope="row">{{ payment.amount|intcomma }}</td>
                                 <td scope="row">{{ payment.date|date }}</td>
                                 <td scope="row" {% if payment.status == 'pending' %} class='text-warning' {% else %} class='text-success' {% endif %}>{{ payment.status|title }}</td>
+                                <td scope="row" >
+                                    {% if payment.status == 'confirmed' %} <a href="{% url 'student_fee_detail' payment.id %}" class="btn btn-primary"><i class="bi bi-eye" title="View Details"></i> </a> {% endif %}
+                                </td>
 
                             </tr>
                         {% endfor %}
