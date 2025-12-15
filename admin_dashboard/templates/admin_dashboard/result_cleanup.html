@@ -1,0 +1,139 @@
+{% extends 'admin_dashboard/layout.html' %}
+
+{% block 'main' %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Clean Blank Results by Class</h5>
+        <div class="alert alert-info">
+            <p class="mb-1">This tool will remove blank or zero-score subjects from student results and recalculate their averages.</p>
+            <p class="mb-1"><strong>Current Session:</strong> {{ academic_info.session|default:"Not Set" }}</p>
+            <p class="mb-1"><strong>Current Term:</strong> {{ academic_info.term|default:"Not Set" }}</p>
+            <p class="mb-0"><strong>Total Results to Process:</strong> {{ total_results }}</p>
+        </div>
+
+        {% if not academic_info or not academic_info.session or not academic_info.term %}
+            <div class="alert alert-danger">
+                <strong>Error:</strong> No active academic session or term found. Please set up the current session and term first.
+            </div>
+        {% elif classes_with_results|length == 0 %}
+            <div class="alert alert-warning">
+                <strong>No Results Found:</strong> There are no results to clean for the current session and term.
+            </div>
+        {% else %}
+            <div class="my-3">
+                <button id="start-cleanup-btn" class="btn btn-primary btn-lg">
+                    <i class="bi bi-eraser-fill"></i> Start Result Cleanup Process
+                </button>
+            </div>
+
+            <ul class="list-group" id="cleanup-list">
+                {% for class_info in classes_with_results %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        id="class-{{ class_info.id }}"
+                        data-class-id="{{ class_info.id }}">
+
+                        <div class="d-flex flex-column">
+                            <span class="class-name fw-bold">{{ class_info.name }} ({{ class_info.count }} results)</span>
+                            <small class="error-message text-danger"></small>
+                            <small class="details-message text-muted"></small>
+                        </div>
+
+                        <span class="status-badge badge bg-secondary">Pending</span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startButton = document.getElementById('start-cleanup-btn');
+
+    if (!startButton) return;
+
+    const cleanupList = document.querySelectorAll('#cleanup-list li');
+    const cleanupUrl = "{% url 'result_cleanup_process_class' %}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    startButton.addEventListener('click', async function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+
+        for (const item of cleanupList) {
+            const statusBadge = item.querySelector('.status-badge');
+            const className = item.querySelector('.class-name');
+            const errorMessage = item.querySelector('.error-message');
+            const detailsMessage = item.querySelector('.details-message');
+            const classId = item.dataset.classId;
+
+            statusBadge.className = 'status-badge badge bg-primary';
+            statusBadge.textContent = 'Processing...';
+            errorMessage.textContent = '';
+            detailsMessage.textContent = '';
+
+            const formData = new FormData();
+            formData.append('class_id', classId);
+
+            try {
+                const response = await fetch(cleanupUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || `Server error: ${response.statusText}`);
+                }
+
+                if (data.status === 'success') {
+                    let resultText = `Completed`;
+                    let detailsText = `Cleaned: ${data.cleaned}, Skipped: ${data.skipped}, Subjects Removed: ${data.subjects_removed}`;
+
+                    if (data.cleaned > 0) {
+                        statusBadge.className = 'status-badge badge bg-success';
+                    } else {
+                        statusBadge.className = 'status-badge badge bg-secondary';
+                        resultText = 'No Changes';
+                    }
+
+                    statusBadge.textContent = resultText;
+                    detailsMessage.textContent = detailsText;
+                    className.style.textDecoration = 'line-through';
+                } else {
+                    throw new Error(data.message || 'An unknown error occurred.');
+                }
+
+            } catch (error) {
+                console.error(`Failed to process class ${classId}:`, error);
+                statusBadge.className = 'status-badge badge bg-danger';
+                statusBadge.textContent = 'Failed';
+                errorMessage.textContent = error.message;
+            }
+        }
+
+        this.innerHTML = '<i class="bi bi-check-circle-fill"></i> Cleanup Complete';
+        this.disabled = false;
+        this.className = 'btn btn-success btn-lg';
+    });
+});
+</script>
+{% endblock %}

@@ -1,11 +1,14 @@
 from datetime import date, timedelta
 
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import Sum, Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -156,3 +159,153 @@ def fix_issue(request):
     else:
         messages.info(request, "No user profiles needed updating to 'PRIMARY'.")
     return HttpResponse('updated')
+
+
+# ============================================
+# views.py
+# ============================================
+
+
+@login_required
+@permission_required("student.change_resultmodel", raise_exception=True)
+def result_cleanup_view(request):
+    """
+    Displays the result cleanup page with classes that have results.
+    """
+    # Get current session and term info
+    academic_info = SchoolAcademicInfoModel.objects.first()
+
+    classes_with_results = []
+
+    if academic_info and academic_info.session and academic_info.term:
+        # Get all classes that have results for current session/term
+        results = ResultModel.objects.filter(
+            session=academic_info.session,
+            term=academic_info.term,
+            result__isnull=False
+        ).select_related('student_class').values(
+            'student_class__id',
+            'student_class__name'
+        ).distinct()
+
+        # Count results per class
+        for result in results:
+            class_id = result['student_class__id']
+            class_name = result['student_class__name']
+
+            count = ResultModel.objects.filter(
+                session=academic_info.session,
+                term=academic_info.term,
+                student_class_id=class_id,
+                result__isnull=False
+            ).count()
+
+            classes_with_results.append({
+                'id': class_id,
+                'name': class_name,
+                'count': count
+            })
+
+        # Sort by class name
+        classes_with_results.sort(key=lambda x: x['name'])
+
+    context = {
+        'academic_info': academic_info,
+        'classes_with_results': classes_with_results,
+        'total_results': sum(c['count'] for c in classes_with_results)
+    }
+    return render(request, 'admin_dashboard/result_cleanup.html', context)
+
+
+@require_POST
+@login_required
+@permission_required("student.change_resultmodel", raise_exception=True)
+def process_result_cleanup_for_class(request):
+    """
+    Removes blank/zero subjects from result JSON for a specific class.
+    Processes one class at a time to avoid timeout.
+    """
+    class_id = request.POST.get('class_id')
+
+    try:
+        # Get current session and term
+        academic_info = SchoolAcademicInfoModel.objects.first()
+
+        if not academic_info or not academic_info.session or not academic_info.term:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'No active academic session/term found'
+            }, status=400)
+
+        if not class_id:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Class ID is required'
+            }, status=400)
+
+        current_session = academic_info.session
+        current_term = academic_info.term
+
+        # Get results for this specific class
+        results_to_clean = ResultModel.objects.filter(
+            session=current_session,
+            term=current_term,
+            student_class_id=class_id,
+            result__isnull=False
+        ).select_related('student', 'student_class')
+
+        cleaned_count = 0
+        skipped_count = 0
+        total_subjects_removed = 0
+
+        with transaction.atomic():
+            for result_obj in results_to_clean:
+                if not result_obj.result or not isinstance(result_obj.result, dict):
+                    skipped_count += 1
+                    continue
+
+                original_result = result_obj.result.copy()
+                cleaned_result = {}
+                subjects_removed = 0
+
+                # Filter out blank/zero subjects
+                for key, subject_data in original_result.items():
+                    # Check if subject data is valid
+                    if subject_data and isinstance(subject_data, dict):
+                        total = subject_data.get('total', 0)
+
+                        # Keep only subjects with non-zero totals
+                        try:
+                            if float(total) > 0:
+                                cleaned_result[key] = subject_data
+                            else:
+                                subjects_removed += 1
+                        except (ValueError, TypeError):
+                            # If total is not a valid number, remove it
+                            subjects_removed += 1
+                    else:
+                        # Remove empty/invalid entries
+                        subjects_removed += 1
+
+                # Only update if we actually removed something
+                if subjects_removed > 0:
+                    result_obj.result = cleaned_result
+                    result_obj.save()  # This will trigger recalculation in save() method
+                    cleaned_count += 1
+                    total_subjects_removed += subjects_removed
+                else:
+                    skipped_count += 1
+
+        return JsonResponse({
+            'status': 'success',
+            'cleaned': cleaned_count,
+            'skipped': skipped_count,
+            'subjects_removed': total_subjects_removed
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({
+            'status': 'error',
+            'message': f'An unexpected error occurred: {str(e)}'
+        }, status=500)
