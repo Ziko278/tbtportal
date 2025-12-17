@@ -1,3 +1,4 @@
+import traceback
 from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required, permission_required
@@ -301,6 +302,37 @@ def process_result_cleanup_for_class(request):
             'cleaned': cleaned_count,
             'skipped': skipped_count,
             'subjects_removed': total_subjects_removed
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({
+            'status': 'error',
+            'message': f'An unexpected error occurred: {str(e)}'
+        }, status=500)
+
+
+@login_required
+@permission_required("student.change_resultmodel", raise_exception=True)
+def process_result_save(request):
+    """
+    Removes blank/zero subjects from result JSON and resaves to recalculate totals.
+    Processes all results for the current session and term.
+    """
+    try:
+        cleaned_count = 0
+        result_list = ResultModel.objects.all()
+        total = ResultModel.objects.count()
+
+        with transaction.atomic():
+            for result in result_list:
+                result.save()
+                cleaned_count += 1
+
+        return JsonResponse({
+            'status': 'success',
+            'cleaned': cleaned_count,
+            'total': total
         })
 
     except Exception as e:
